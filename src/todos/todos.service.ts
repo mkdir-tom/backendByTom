@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { TodosInterface } from './todos.interface';
-import { CreateTodosDTO, QueryOptions } from './dto/create-todos.dto';
+import { CreateTodosDTO } from './dto/create-todos.dto';
+import { UpdateTodosDTO } from './dto/update-todos.dto';
 
 @Injectable()
 export class TodosService {
@@ -10,13 +11,21 @@ export class TodosService {
     @InjectModel('Todo') private readonly todoModel: Model<TodosInterface>,
   ) {}
 
-  async getTodos(options: QueryOptions) {
+  async getTodos(page: number, size: number) {
     const todos = await this.todoModel
       .find()
-      .skip(Number(options.page))
-      .limit(Number(options.perpage))
+      .skip(this.calSkip(page, size))
+      .limit(Number(size))
       .exec();
-    return todos;
+    const todosCount = await this.todoModel.countDocuments().exec();
+
+    return {
+      data: todos,
+      currentPage: page,
+      pages: this.calPage(todosCount, size),
+      currentCount: todos.length,
+      totalCount: todosCount,
+    };
   }
 
   async getTodo(id): Promise<TodosInterface> {
@@ -34,11 +43,11 @@ export class TodosService {
 
   async updateTodo(
     id,
-    createTodosDTO: CreateTodosDTO,
+    updateTodosDTO: UpdateTodosDTO,
   ): Promise<TodosInterface> {
     const updatedTodo = await this.todoModel.findByIdAndUpdate(
       id,
-      createTodosDTO,
+      updateTodosDTO,
       { new: true },
     );
     return updatedTodo;
@@ -47,5 +56,13 @@ export class TodosService {
   async deleteTodo(id): Promise<TodosInterface> {
     const deletedTodo = await this.todoModel.findByIdAndRemove(id);
     return deletedTodo;
+  }
+
+  private calSkip(page: number, size: number): number {
+    return (page - 1) * size;
+  }
+
+  private calPage(count: number, size: number): number {
+    return Math.ceil(count / size);
   }
 }

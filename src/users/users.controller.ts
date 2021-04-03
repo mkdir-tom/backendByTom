@@ -1,4 +1,14 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  Res,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateUsersDTO } from './dto/create-users.dto';
 import { UsersService } from './users.service';
 
@@ -13,5 +23,12 @@ export class UsersController {
       message: 'User has been successfuly added!',
       user: addedUser,
     });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getProfile(@Request() req) {
+    return req.user;
+    // return `username:${req.user.username} FirstName:${req.user.username} Lastname:${req.user.lastname}`;
   }
 }

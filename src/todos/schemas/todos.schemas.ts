@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
 export const TodosSchemas = new mongoose.Schema({
-  title: String,
-  description: String,
+  title: { type: String, required: true },
+  description: { type: String, required: false },
 });

@@ -9,8 +9,7 @@ import { UsersModule } from './users/users.module';
 @Module({
   imports: [
     TodosModule,
-    MongooseModule.forRoot('mongodb://localhost:2717/dbuser'),
-    MongooseModule.forRoot('mongodb://localhost:2717/dbtodo'),
+    MongooseModule.forRoot('mongodb://localhost:27017/dbuser'),
     AuthModule,
     UsersModule,
   ],
