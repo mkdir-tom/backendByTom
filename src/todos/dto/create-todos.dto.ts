@@ -6,4 +6,6 @@ export class CreateTodosDTO {
   @Length(2, 100)
   readonly title: string;
   readonly description: string;
+
+  userId: string;
 }

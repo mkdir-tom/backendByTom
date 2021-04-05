@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { TodosInterface } from './todos.interface';
 import { CreateTodosDTO } from './dto/create-todos.dto';
 import { UpdateTodosDTO } from './dto/update-todos.dto';
+import { title } from 'node:process';
 
 @Injectable()
 export class TodosService {
@@ -11,16 +12,15 @@ export class TodosService {
     @InjectModel('Todo') private readonly todoModel: Model<TodosInterface>,
   ) {}
 
-  async getTodos(page: number, size: number) {
+  async getTodos(page: number, size: number, userId: string) {
     const todos = await this.todoModel
-      .find()
+      .find({ userId: userId }, '_id title description')
       .skip(this.calSkip(page, size))
       .limit(Number(size))
       .exec();
     const todosCount = await this.todoModel.countDocuments().exec();
-
     return {
-      data: todos,
+      detail: todos,
       currentPage: page,
       pages: this.calPage(todosCount, size),
       currentCount: todos.length,

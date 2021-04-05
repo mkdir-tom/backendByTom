@@ -13,11 +13,13 @@ import {
   Req,
   Res,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
 import { CreateTodosDTO } from './dto/create-todos.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UpdateTodosDTO } from './dto/update-todos.dto';
+import { title } from 'node:process';
 
 @Controller('todos')
 export class TodosController {
@@ -29,8 +31,10 @@ export class TodosController {
   async getTodos(
     @Query('page') page: number | 1,
     @Query('perPage') size: number | 10,
+    @Request() req,
   ) {
-    const todos = this.todosSvc.getTodos(page, size);
+    const userId = req.user.userId;
+    const todos = this.todosSvc.getTodos(page, size, userId);
     return todos;
   }
 
@@ -46,11 +50,19 @@ export class TodosController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async addTodo(@Res() res, @Body() createTodosDTO: CreateTodosDTO) {
+  async addTodo(
+    @Request() req,
+    @Res() res,
+    @Body() createTodosDTO: CreateTodosDTO,
+  ) {
+    createTodosDTO.userId = req.user.userId;
     const addedTodo = await this.todosSvc.addTodo(createTodosDTO);
     return res.status(HttpStatus.OK).json({
       message: 'Todo has been successfuly added!',
-      todo: addedTodo,
+      todo: {
+        title: addedTodo.title,
+        description: addedTodo.description,
+      },
     });
   }
 

@@ -21,7 +21,12 @@ export class UsersController {
     const addedUser = await this.usersSvc.addUser(createUsersDTO);
     return res.status(HttpStatus.OK).json({
       message: 'User has been successfuly added!',
-      user: addedUser,
+      user: {
+        _id: addedUser._id,
+        username: addedUser.username,
+        firstname: addedUser.firstname,
+        lastname: addedUser.lastname,
+      },
     });
   }
 
